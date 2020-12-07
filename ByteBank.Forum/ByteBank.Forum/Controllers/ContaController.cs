@@ -9,6 +9,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
+using Microsoft.Owin.Security;
 
 namespace ByteBank.Forum.Controllers
 {
@@ -50,6 +51,14 @@ namespace ByteBank.Forum.Controllers
             }
         }
 
+        public IAuthenticationManager AuthenticationManager
+        {
+            get
+            {
+                var contextoOwin = Request.GetOwinContext();
+                return contextoOwin.Authentication;
+            }
+        }
 
         public ActionResult Registrar()
         {
@@ -166,6 +175,14 @@ namespace ByteBank.Forum.Controllers
             // Algo de errado aconteceu
             return View();
         }
+
+        [HttpPost]
+        public ActionResult Logoff()
+        {
+            AuthenticationManager.SignOut(DefaultAuthenticationTypes.ApplicationCookie);
+            return RedirectToAction("Index", "Home");
+        }
+            
 
         private ActionResult SenhaOuUsuarioInvalidos()
         {
