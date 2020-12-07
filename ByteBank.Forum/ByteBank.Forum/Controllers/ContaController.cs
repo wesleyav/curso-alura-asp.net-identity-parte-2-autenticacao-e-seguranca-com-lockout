@@ -164,6 +164,14 @@ namespace ByteBank.Forum.Controllers
                 switch (signInResultado)
                 {
                     case SignInStatus.Success:
+
+                        if (!usuario.EmailConfirmed)
+                        {
+                            AuthenticationManager.SignOut(DefaultAuthenticationTypes.ApplicationCookie);
+                            return View("Aguardando confirmação!");
+                        }
+
+
                         return RedirectToAction("Index", "Home");
                     case SignInStatus.LockedOut:
                         var senhaCorreta = await UserManager.CheckPasswordAsync(
