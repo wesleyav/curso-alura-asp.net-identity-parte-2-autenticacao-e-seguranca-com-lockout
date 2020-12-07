@@ -149,7 +149,7 @@ namespace ByteBank.Forum.Controllers
                     await SignInManager.PasswordSignInAsync(
                     usuario.UserName,
                     modelo.Senha,
-                    isPersistent: false,
+                    isPersistent: modelo.ContinuarLogado,
                     shouldLockout: false);
 
                 switch (signInResultado)
