@@ -32,6 +32,24 @@ namespace ByteBank.Forum.Controllers
             }
         }
 
+        private SignInManager<UsuarioAplicacao, string> _signInManager;
+        public SignInManager<UsuarioAplicacao, string> SignInManager
+        {
+            get
+            {
+                if (_signInManager == null)
+                {
+                    var contextOwin = HttpContext.GetOwinContext();
+                    _signInManager = contextOwin.GetUserManager<SignInManager<UsuarioAplicacao, string>>();
+                }
+                return _signInManager;
+            }
+            set
+            {
+                _signInManager = value;
+            }
+        }
+
 
         public ActionResult Registrar()
         {
@@ -120,18 +138,39 @@ namespace ByteBank.Forum.Controllers
             if (ModelState.IsValid)
             {
                 var usuario = await UserManager.FindByEmailAsync(modelo.Email);
-                if (usuario != null)
-                {
-                    if (modelo.Senha == usuario.PasswordHash)
-                    {
 
-                    }
+                if (usuario == null)
+                {
+                    return SenhaOuUsuarioInvalidos();
                 }
-                // Realizar login pelo Identity
-            }          
+
+
+                var signInResultado =
+                    await SignInManager.PasswordSignInAsync(
+                    usuario.UserName,
+                    modelo.Senha,
+                    isPersistent: false,
+                    shouldLockout: false);
+
+                switch (signInResultado)
+                {
+                    case SignInStatus.Success:
+                        return RedirectToAction("Index", "Home");
+                    default:
+                        return SenhaOuUsuarioInvalidos();
+
+                }
+
+            }
 
             // Algo de errado aconteceu
             return View();
+        }
+
+        private ActionResult SenhaOuUsuarioInvalidos()
+        {
+            ModelState.AddModelError("", "Credenciais inválidas!");
+            return View("Login");
         }
 
         private void AdicionaErros(IdentityResult resultado)
