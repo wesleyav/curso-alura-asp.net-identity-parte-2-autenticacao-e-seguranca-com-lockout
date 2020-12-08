@@ -136,7 +136,7 @@ namespace ByteBank.Forum.Controllers
                         usuario.Id,
                         "Fórum Bytebank - Alteração de senha",
                         $"Clique aqui {linkDeCallback} para alterar a sua senha!");
-                                        
+
                 }
 
                 return View("EmailAlteracaoSenhaEnviado");
@@ -148,7 +148,38 @@ namespace ByteBank.Forum.Controllers
 
         public ActionResult ConfirmacaoAlteracaoSenha(string usuarioId, string token)
         {
+            var modelo = new ContaConfirmacaoAlteracaoSenhaViewModel
+            {
+                UsuarioId = usuarioId,
+                Token = token
+            };
+            return View(modelo);
+        }
 
+        [HttpPost]
+        public async Task<ActionResult> ConfirmacaoAlteracaoSenha(ContaConfirmacaoAlteracaoSenhaViewModel modelo)
+        {
+            if (ModelState.IsValid)
+            {
+                // Verifica o token recebido
+                // Verifica o ID do usuário
+                // Mudar a senha
+
+                var resultadoAlteracao = await UserManager.ResetPasswordAsync(modelo.UsuarioId, modelo.Token, modelo.NovaSenha);
+
+
+                if (resultadoAlteracao.Succeeded)
+                {
+                    return RedirectToAction("index", "Home");
+
+                }
+
+                AdicionaErros(resultadoAlteracao);
+
+            }
+
+
+            return View();
         }
 
 
